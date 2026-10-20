@@ -52,7 +52,7 @@ public class PricingGrpcService
                     request.getDropLat(),
                     request.getDropLon(),
                     request.getVehicleType(),
-                    BigDecimal.valueOf(paise, 2)
+                    fare
             );
 
             FareQuoteResponse response = FareQuoteResponse.newBuilder()
