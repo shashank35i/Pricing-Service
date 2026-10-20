@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package goon.pricing;
+
+option java_multiple_files = true;
+option java_package = "com.goon.grpc.pricing";
+option java_outer_classname = "PricingProto";
+
+service PricingService {
+  rpc GetFareQuote(FareQuoteRequest)
+      returns (FareQuoteResponse);
+}
+
+message FareQuoteRequest {
+  string customerId = 1;
+  double pickupLat = 2;
+  double pickupLon = 3;
+  double dropLat = 4;
+  double dropLon = 5;
+  string vehicleType = 6;
+}
+
+message FareQuoteResponse {
+  int64 estimatedFare = 1;
+  string currency = 2;
+  string signedQuote = 3;
+}
