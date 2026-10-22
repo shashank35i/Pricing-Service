@@ -1,6 +1,16 @@
+server:
+  port: 8086
+
+
 spring:
   application:
     name: pricing-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${GOON_KEYCLOAK_ISSUER}
+          audiences: pricing-service
   grpc:
     server:
       port: 9090
@@ -9,4 +19,4 @@ spring:
 
 
 app:
-  secret-key: 98391371dkadad32bjhdJKKJNJYg78adbhJHk
+  secret-key: YTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=

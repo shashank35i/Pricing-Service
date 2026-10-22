@@ -35,8 +35,8 @@ public class QuoteSigner {
 
         return Jwts.builder()
                 .header()
-                .type("JWT")
-                .and()
+                    .type("JWT")
+                    .and()
                 .id(UUID.randomUUID().toString())
                 .subject(customerId)
                 .claim("pickupLat", pickupLat)

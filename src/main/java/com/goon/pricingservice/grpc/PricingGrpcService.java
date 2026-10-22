@@ -41,6 +41,8 @@ public class PricingGrpcService
                     .movePointRight(2)
                     .longValueExact();
 
+
+
             if (paise < 0) {
                 throw new IllegalArgumentException("Invalid fare");
             }
