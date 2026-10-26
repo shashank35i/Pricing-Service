@@ -9,7 +9,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${GOON_KEYCLOAK_ISSUER}
+          issuer-uri: http://localhost:8090/realms/goon-internal-auth
           audiences: pricing-service
   grpc:
     server:
@@ -20,3 +20,5 @@ spring:
 
 app:
   secret-key: YTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=
+  osrm:
+      url: https://router.project-osrm.org
