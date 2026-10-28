@@ -15,24 +15,48 @@ public class GrpcSecurityConfig {
 
     @Bean
     @GlobalServerInterceptor
-    AuthenticationProcessInterceptor internalPricingSecurity(GrpcSecurity grpc) throws Exception {
+    AuthenticationProcessInterceptor internalPricingSecurity(
+            GrpcSecurity grpc) throws Exception {
+
         return grpc
                 .authorizeRequests(requests -> requests
+
                         .methods("goon.pricing.PricingService/GetFareQuote")
-                        .access((authentication, context) -> {
-                            Authentication current = authentication.get();
-                            if (!(current instanceof JwtAuthenticationToken jwtAuthentication)) {
-                                return new AuthorizationDecision(false);
-                            }
-                            boolean hasScope = jwtAuthentication.getAuthorities().stream()
-                                    .anyMatch(authority -> authority.getAuthority().equals("SCOPE_pricing.quote"));
-                            boolean trustedGateway = "api-gateway".equals(
-                                    jwtAuthentication.getToken().getClaimAsString("azp"));
-                            return new AuthorizationDecision(hasScope && trustedGateway);
-                        })
+                        .access((authentication, context) ->
+                                check(authentication.get(),
+                                        "goon-services", "pricing.quote"))
+
+                        .methods("goon.pricing.PricingService/CalculateFinalFare")
+                        .access((authentication, context) ->
+                                check(authentication.get(),
+                                        "goon-services", "pricing.final"))
+
                         .allRequests()
                         .denyAll())
-                .oauth2ResourceServer(resourceServer -> resourceServer.jwt(Customizer.withDefaults()))
+
+                .oauth2ResourceServer(resourceServer ->
+                        resourceServer.jwt(Customizer.withDefaults()))
+
                 .build();
+    }
+
+    private AuthorizationDecision check(
+            Authentication authentication,
+            String clientId,
+            String scope) {
+
+        if (!(authentication instanceof JwtAuthenticationToken jwt)) {
+            return new AuthorizationDecision(false);
+        }
+
+        boolean hasScope = jwt.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority()
+                        .equals("SCOPE_" + scope));
+
+        boolean trustedClient = clientId.equals(
+                jwt.getToken().getClaimAsString("azp")
+        );
+
+        return new AuthorizationDecision(hasScope && trustedClient);
     }
 }

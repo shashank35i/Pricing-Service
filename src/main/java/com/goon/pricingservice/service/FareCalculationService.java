@@ -34,7 +34,7 @@ public class FareCalculationService {
 
         Rate rate = rateFor(vehicleType);
 
-        String path = String.format(
+        String path = String.format(   ///to follow 3232.424 strictly for consistency  , coz frontend can send 33,445 or 3442.424
                 Locale.US,
                 "/route/v1/driving/%f,%f;%f,%f?overview=false",
                 pickupLon, pickupLat,

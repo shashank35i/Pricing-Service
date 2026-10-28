@@ -9,6 +9,20 @@ option java_outer_classname = "PricingProto";
 service PricingService {
   rpc GetFareQuote(FareQuoteRequest)
       returns (FareQuoteResponse);
+  rpc CalculateFinalFare(FinalFareRequest)
+      returns (FinalFareResponse);
+}
+
+message FinalFareRequest {
+  string rideId = 1;
+  int64 quotedFarePaise = 2;
+  int64 waitingTimeSeconds = 3;
+  string vehicleType = 4;
+}
+
+message FinalFareResponse {
+  int64 finalFarePaise = 1;
+  string currency = 2;
 }
 
 message FareQuoteRequest {

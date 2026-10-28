@@ -7,6 +7,7 @@ import com.goon.pricingservice.service.FareCalculationService;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.grpc.server.service.GrpcService;
 
 import java.math.BigDecimal;
@@ -14,11 +15,37 @@ import java.math.RoundingMode;
 
 @GrpcService
 @RequiredArgsConstructor
+@Slf4j
 public class PricingGrpcService
         extends PricingServiceGrpc.PricingServiceImplBase {
 
     private final QuoteSigner quoteSigner;
     private final FareCalculationService fareService;
+
+    @Override
+    public void calculateFinalFare(FinalFareRequest request,
+                                   StreamObserver<FinalFareResponse> observer) {
+        try {
+            java.util.UUID.fromString(request.getRideId());
+            if (request.getQuotedFarePaise() < 0 || request.getWaitingTimeSeconds() < 0) {
+                throw new IllegalArgumentException("Fare and waiting time must be nonnegative");
+            }
+            BigDecimal fare = fareService.calculateFinalFare(
+                    BigDecimal.valueOf(request.getQuotedFarePaise(), 2),
+                    request.getWaitingTimeSeconds(), request.getVehicleType());
+            observer.onNext(FinalFareResponse.newBuilder()
+                    .setFinalFarePaise(fare.movePointRight(2).longValueExact())
+                    .setCurrency("INR").build());
+            observer.onCompleted();
+        } catch (IllegalArgumentException | ArithmeticException e) {
+            observer.onError(Status.INVALID_ARGUMENT.withDescription("Invalid final fare request")
+                    .asRuntimeException());
+        } catch (Exception e) {
+            log.error("Final fare calculation failed", e);
+            observer.onError(Status.INTERNAL.withDescription("Final fare calculation failed")
+                    .asRuntimeException());
+        }
+    }
 
     @Override
     public void getFareQuote(
@@ -73,9 +100,12 @@ public class PricingGrpcService
                             .asRuntimeException()
             );
         } catch (Exception e) {
+            log.error("Fare estimation failed", e);
+
             observer.onError(
                     Status.INTERNAL
                             .withDescription("Fare estimation failed")
+                            .withCause(e)
                             .asRuntimeException()
             );
         }
