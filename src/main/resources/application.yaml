@@ -21,4 +21,4 @@ spring:
 app:
   secret-key: YTIzNDU2Nzg5MGFiY2RlZmdoaWprbG1ub3BxcnN0dXY=
   osrm:
-      url: https://router.project-osrm.org
+      url: http://localhost:5000
